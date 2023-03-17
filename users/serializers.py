@@ -26,12 +26,38 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.Meta.model.objects.create(
-            email = validated_data['email'],
-            first_name = validated_data['first_name'],
-            last_name = validated_data['last_name']
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
         )
 
         user.set_password(validated_data['password'])
         user.save()
 
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        user = self.Meta.model.objects.create(
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
+
+    class Meta:
+        
+        def create(self, validated_data):
+            return get_user_model().objects.create_user(**validated_data)
+
+        model = get_user_model()
+        fields = ('email', 'password', 'first_name', 'last_name')
+        extra_kwargs = {
+            'password': {'write_only': True, 'min_length': 8},
+        }
